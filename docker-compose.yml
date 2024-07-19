@@ -1,0 +1,29 @@
+services:
+  dev-db:
+    image: cockroachdb/cockroach:arm64-v24.1.0
+    # Required when running on platform other than amd64, like Apple M1/M2:
+    platform: "linux/arm64"
+    command: start-single-node --cluster-name=example-single-node --insecure
+    ports:
+      - 26257:26257
+      - 8080:8080
+    volumes:
+      - "${PWD}/cockroach-data-test/crdb:/cockroach/cockroach-data"
+  test-db:
+    image: cockroachdb/cockroach:arm64-v24.1.0
+    platform: "linux/arm64"
+    command: start-single-node --cluster-name=example-single-node --insecure
+    ports:
+      - 26258:26257
+      - 8081:8080
+  # app:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: nest-docker-postgres
+  #   ports:
+  #     - '3000:3000'
+  #   depends_on:
+  #     - dev-db
+  #   volumes:
+  #     - ./src:/app/src
