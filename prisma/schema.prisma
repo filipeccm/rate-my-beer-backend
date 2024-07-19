@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "cockroachdb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id    Int     @default(sequence()) @id
+  name  String? 
+  email String  @unique
+  hash String?
+  beers UsersLikedBeers[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@map("users")
+}
+
+model Beer {
+  id        Int      @default(sequence()) @id
+  name     String
+  description   String?
+  likedBy UsersLikedBeers[] 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@map("beers")
+}
+
+model UsersLikedBeers {
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     Int // relation scalar field (used in the `@relation` attribute above)
+  beer   Beer @relation(fields: [beerId], references: [id] )
+  beerId Int // relation scalar field (used in the `@relation` attribute above)
+
+   @@id([userId, beerId])
+}
+
+// generator nestjsDto {
+//   provider                        = "prisma-generator-nestjs-dto"
+//   output                          = "../src/generated/nestjs-dto"
+//   outputToNestJsResourceStructure = "false"
+//   exportRelationModifierClasses   = "true"
+//   reExport                        = "false"
+//   createDtoPrefix                 = "Create"
+//   updateDtoPrefix                 = "Update"
+//   dtoSuffix                       = "Dto"
+//   entityPrefix                    = ""
+//   entitySuffix                    = ""
+//   fileNamingStyle                 = "camel"
+// }
