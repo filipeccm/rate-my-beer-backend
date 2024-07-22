@@ -15,7 +15,10 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from '../auth/decorators/get-user.decorator';
 import { User } from '@prisma/client';
+import { ApiExtraModels } from '@nestjs/swagger';
+import { UserEntity } from './entities/user.entity';
 
+@ApiExtraModels(UserEntity)
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}

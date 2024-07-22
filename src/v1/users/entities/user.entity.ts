@@ -1,11 +1,13 @@
-import { User as PrismaUser, UsersLikedBeers } from '@prisma/client';
+import { ApiHideProperty } from '@nestjs/swagger';
+import { User } from '@prisma/client';
 
-export class User implements PrismaUser {
+export class UserEntity implements User {
   id: number;
-  email: string;
   name: string;
-  beers?: UsersLikedBeers[];
-  updatedAt: Date;
+  email: string;
   createdAt: Date;
+  updatedAt: Date;
+
+  @ApiHideProperty()
   hash: string;
 }
