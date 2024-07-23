@@ -1,13 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, MaxLength } from 'class-validator';
+import { PartialType } from '@nestjs/swagger';
+import { CreateBeerDto } from './create-beer.dto';
 
-export class UpdateBeerDto {
-  @IsString()
-  @IsNotEmpty()
-  @IsOptional()
-  name: string;
-
-  @IsString()
-  @IsOptional()
-  @MaxLength(300)
-  description: string;
-}
+export class UpdateBeerDto extends PartialType(CreateBeerDto) {}

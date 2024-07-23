@@ -23,7 +23,6 @@ export class AuthService {
         select: {
           id: true,
           email: true,
-          createdAt: true,
         },
       });
       return this.signToken(user.id, user.email);
@@ -38,7 +37,6 @@ export class AuthService {
   }
 
   async signin(dto: AuthSignupDto) {
-    // });
     try {
       const user = await this.prisma.user.findUnique({
         where: {
@@ -67,7 +65,7 @@ export class AuthService {
     };
 
     const token = await this.jwt.signAsync(payload, {
-      expiresIn: '15m',
+      expiresIn: process.env.JWT_EXPIRATION,
       secret: process.env.JWT_SECRET,
     });
 
