@@ -1,11 +1,11 @@
 import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { PrismaService } from '../src/v1/prisma/prisma.service';
-import { AppModule } from '../src/app.module';
+import { PrismaService } from '../prisma/prisma.service';
+import { AppModule } from '../app.module';
 import * as pactum from 'pactum';
-import { AuthSignupDto } from '../src/v1/auth/dto/signup.dto';
-import { UpdateUserDto } from '../src/v1/users/dto/update-user.dto';
-import { CreateBeerDto } from '../src/v1/beers/dto/create-beer.dto';
+import { AuthSignupDto } from '../auth/dto/signup.dto';
+import { UpdateUserDto } from '../users/dto/update-user.dto';
+import { CreateBeerDto } from '../beers/dto/create-beer.dto';
 
 describe('app e2e', () => {
   let app: INestApplication;
@@ -22,12 +22,13 @@ describe('app e2e', () => {
         whitelist: true,
       }),
     );
+    app.setGlobalPrefix('v1');
     await app.init();
     await app.listen(3333);
 
     prisma = app.get(PrismaService);
     await prisma.cleanDb();
-    pactum.request.setBaseUrl('http://localhost:3333');
+    pactum.request.setBaseUrl('http://localhost:3333/v1');
   });
 
   afterAll(async () => {
