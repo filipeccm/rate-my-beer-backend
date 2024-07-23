@@ -2,19 +2,21 @@ import {
   Body,
   Controller,
   Get,
-  NotFoundException,
   Param,
   ParseIntPipe,
   Post,
-  Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateBeerDto } from './dto/create-beer.dto';
-import { UpdateBeerDto } from './dto/update-beer.dto';
 import { BeersService } from './beers.service';
 import { Beer } from '@prisma/client';
 import { GetBeersQueryParamsDto } from './dto/get-beers-params.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { BeerEntity } from './entity/beer.entity';
+import { ApiExtraModels } from '@nestjs/swagger';
 
+@ApiExtraModels(BeerEntity)
 @Controller('beers')
 export class BeersController {
   constructor(private readonly beersService: BeersService) {}
@@ -24,25 +26,13 @@ export class BeersController {
     return this.beersService.getBeers(params);
   }
   @Get(':id')
-  async getOneBeer(@Param('id', ParseIntPipe) id: number): Promise<Beer> {
-    try {
-      return await this.beersService.getOneBeer(id);
-    } catch (err) {
-      throw new NotFoundException();
-    }
+  getOneBeer(@Param('id', ParseIntPipe) id: number): Promise<Beer> {
+    return this.beersService.getOneBeer(id);
   }
 
   @Post()
+  @UseGuards(AuthGuard('jwt'))
   createBeer(@Body() createBeerDto: CreateBeerDto) {
     return this.beersService.createBeer(createBeerDto);
-  }
-
-  @Put(':id')
-  updateBeer(@Param('id') id: string, @Body() updateBeerDto: UpdateBeerDto) {
-    return {
-      id,
-      name: updateBeerDto.name,
-      type: updateBeerDto.description,
-    };
   }
 }

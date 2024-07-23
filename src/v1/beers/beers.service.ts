@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Beer, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { GetBeersQueryParamsDto } from './dto/get-beers-params.dto';
@@ -6,7 +6,7 @@ import { GetBeersQueryParamsDto } from './dto/get-beers-params.dto';
 @Injectable()
 export class BeersService {
   constructor(private prisma: PrismaService) {}
-  async getBeers(
+  getBeers(
     params: GetBeersQueryParamsDto & { where?: Prisma.BeerWhereInput },
   ): Promise<Beer[]> {
     const { skip, take, where, orderBy } = params;
@@ -19,10 +19,12 @@ export class BeersService {
   }
 
   async getOneBeer(id: number): Promise<Beer> {
-    return this.prisma.beer.findUnique({ where: { id: id } });
+    const beer = await this.prisma.beer.findUnique({ where: { id: id } });
+    if (!beer) throw new NotFoundException();
+    return beer;
   }
 
-  async createBeer(data: Prisma.BeerCreateInput): Promise<Beer> {
+  createBeer(data: Prisma.BeerCreateInput): Promise<Beer> {
     return this.prisma.beer.create({ data });
   }
 }
