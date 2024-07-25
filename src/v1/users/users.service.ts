@@ -25,7 +25,7 @@ export class UsersService {
       select: {
         name: true,
         email: true,
-        beers: {
+        likedBeers: {
           select: {
             beer: true,
           },
