@@ -8,9 +8,12 @@ import { Prisma } from '@prisma/client';
 const validKeys: (keyof Prisma.BeerOrderByWithRelationInput)[] = [
   'id',
   'name',
-  'description',
-  'createdAt',
-  'updatedAt',
+  'descript',
+  'abv',
+  'ibu',
+  'srm',
+  'createdat',
+  'updatedat',
 ];
 
 export function IsValidOrderBy(validationOptions?: ValidationOptions) {

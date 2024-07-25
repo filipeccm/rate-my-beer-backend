@@ -6,16 +6,24 @@ import { GetBeersQueryParamsDto } from './dto/get-beers-params.dto';
 @Injectable()
 export class BeersService {
   constructor(private prisma: PrismaService) {}
-  getBeers(
+  async getBeers(
     params: GetBeersQueryParamsDto & { where?: Prisma.BeerWhereInput },
-  ): Promise<Beer[]> {
-    const { skip, take, where, orderBy } = params;
-    return this.prisma.beer.findMany({
+  ) {
+    const { skip, take = 20, where, orderBy } = params;
+    const total = await this.prisma.beer.count({ where });
+    const beerResults = await this.prisma.beer.findMany({
       skip,
       take,
       where,
       orderBy,
     });
+
+    return {
+      total,
+      count: take,
+      offset: skip ?? 0,
+      results: beerResults,
+    };
   }
 
   async getOneBeer(id: number): Promise<Beer> {
