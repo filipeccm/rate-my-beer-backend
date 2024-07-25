@@ -5,7 +5,8 @@ import { BeersModule } from './beers/beers.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { UserslikedbeersModule } from './userslikedbeers/userslikedbeers.module';
+import { UsersBeersLikesModule } from './userslikedbeers/users-beers-likes.module';
+import { UsersBeersRatingsModule } from './ratings/users-beers-ratings.module';
 
 @Module({
   imports: [
@@ -13,7 +14,8 @@ import { UserslikedbeersModule } from './userslikedbeers/userslikedbeers.module'
     UsersModule,
     AuthModule,
     PrismaModule,
-    UserslikedbeersModule,
+    UsersBeersLikesModule,
+    UsersBeersRatingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
