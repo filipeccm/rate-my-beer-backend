@@ -1,6 +1,14 @@
-import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  IsInt,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
+import { Prisma } from '@prisma/client';
 
-export class CreateBeerDto {
+export class CreateBeerDto implements Prisma.BeerCreateInput {
   @IsString()
   @IsNotEmpty()
   name: string;
@@ -9,5 +17,19 @@ export class CreateBeerDto {
   @IsNotEmpty()
   @MaxLength(300)
   @IsOptional()
-  description: string;
+  descript?: string;
+
+  @IsOptional()
+  @IsNumber({
+    maxDecimalPlaces: 1,
+  })
+  abv?: number;
+
+  @IsOptional()
+  @IsInt()
+  ibu?: number;
+
+  @IsOptional()
+  @IsInt()
+  srm?: number;
 }

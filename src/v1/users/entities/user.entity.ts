@@ -5,9 +5,8 @@ export class UserEntity implements User {
   id: number;
   name: string;
   email: string;
-  createdAt: Date;
-  updatedAt: Date;
-
+  createdat: Date;
+  updatedat: Date;
   @ApiHideProperty()
   hash: string;
 }

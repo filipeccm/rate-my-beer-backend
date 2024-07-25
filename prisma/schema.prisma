@@ -13,48 +13,99 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id    Int     @default(sequence()) @id
-  name  String? 
-  email String  @unique
-  hash String?
-  beers UsersLikedBeers[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-
-  @@map("users")
-}
-
 model Beer {
-  id        Int      @default(sequence()) @id
-  name     String
-  description   String?
-  likedBy UsersLikedBeers[] 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  id         Int                 @id @default(sequence())
+  name       String?
+  abv        Float?
+  ibu        Int?
+  srm        Int?
+  upc        Int?
+  descript   String?
+  brewery_id Int?
+  breweries  Brewery?            @relation(fields: [brewery_id], references: [id], onUpdate: NoAction, map: "brewery_id_link")
+  cat_id     Int?
+  categories Category?           @relation(fields: [cat_id], references: [id], onUpdate: NoAction, map: "cat_id_link")
+  style_id   Int?
+  styles     Style?              @relation(fields: [style_id], references: [id], onUpdate: NoAction, map: "style_id_link")
+  likedBy    UsersBeersLikes[]
+  ratings    UsersBeersRatings[]
+  createdat  DateTime            @default(now()) @db.Timestamptz(6)
+  updatedat  DateTime            @default(now()) @db.Timestamptz(6)
 
   @@map("beers")
 }
 
-model UsersLikedBeers {
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId     Int // relation scalar field (used in the `@relation` attribute above)
-  beer   Beer @relation(fields: [beerId], references: [id] )
-  beerId Int // relation scalar field (used in the `@relation` attribute above)
+model Brewery {
+  id        Int      @id @default(sequence())
+  name      String?
+  address1  String?
+  address2  String?
+  city      String?
+  state     String?
+  code      String?
+  country   String?
+  phone     String?
+  website   String?
+  filepath  String?
+  descript  String?
+  beers     Beer[]
+  createdat DateTime @default(now()) @db.Timestamptz(6)
+  updatedat DateTime @default(now()) @db.Timestamptz(6)
 
-   @@id([userId, beerId])
+  @@map("breweries")
 }
 
-// generator nestjsDto {
-//   provider                        = "prisma-generator-nestjs-dto"
-//   output                          = "../src/generated/nestjs-dto"
-//   outputToNestJsResourceStructure = "false"
-//   exportRelationModifierClasses   = "true"
-//   reExport                        = "false"
-//   createDtoPrefix                 = "Create"
-//   updateDtoPrefix                 = "Update"
-//   dtoSuffix                       = "Dto"
-//   entityPrefix                    = ""
-//   entitySuffix                    = ""
-//   fileNamingStyle                 = "camel"
-// }
+model Category {
+  id        Int      @id @default(sequence())
+  cat_name  String?
+  beers     Beer[]
+  styles    Style[]
+  createdat DateTime @default(now()) @db.Timestamptz(6)
+  updatedat DateTime @default(now()) @db.Timestamptz(6)
+
+  @@map("categories")
+}
+
+model Style {
+  id         Int       @id @default(sequence())
+  style_name String?
+  beers      Beer[]
+  cat_id     Int
+  categories Category? @relation(fields: [cat_id], references: [id], onUpdate: NoAction, map: "cat_id_link")
+  createdat  DateTime  @default(now()) @db.Timestamptz(6)
+  updatedat  DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@map("styles")
+}
+
+model User {
+  id         Int                 @id @default(sequence())
+  name       String
+  email      String              @unique()
+  hash       String
+  likedBeers UsersBeersLikes[]
+  ratedBeers UsersBeersRatings[]
+  createdat  DateTime            @default(now()) @db.Timestamptz(6)
+  updatedat  DateTime            @default(now()) @db.Timestamptz(6)
+
+  @@map("users")
+}
+
+model UsersBeersLikes {
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int // relation scalar field (used in the `@relation` attribute above)
+  beer   Beer @relation(fields: [beerId], references: [id], onDelete: Cascade)
+  beerId Int // relation scalar field (used in the `@relation` attribute above)
+
+  @@id([userId, beerId])
+}
+
+model UsersBeersRatings {
+  rating Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int // relation scalar field (used in the `@relation` attribute above)
+  beer   Beer @relation(fields: [beerId], references: [id], onDelete: Cascade)
+  beerId Int // relation scalar field (used in the `@relation` attribute above)
+
+  @@id([userId, beerId])
+}

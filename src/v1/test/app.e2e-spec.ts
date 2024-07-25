@@ -37,6 +37,7 @@ describe('app e2e', () => {
 
   describe('Auth', () => {
     const dto: AuthSignupDto = {
+      name: 'Test User',
       email: 'test@gmail.com',
       password: '123',
     };
@@ -170,7 +171,10 @@ describe('app e2e', () => {
     describe('Create Beer', () => {
       const dto: CreateBeerDto = {
         name: 'Guinness',
-        description: 'Best irish beer ever',
+        descript: 'Best irish beer ever',
+        abv: 1.4,
+        ibu: 2,
+        srm: 10,
       };
       it('should create a beer', () => {
         return pactum
@@ -204,21 +208,23 @@ describe('app e2e', () => {
     });
   });
 
-  describe('Userslikedbeers', () => {
+  describe('UsersBeersLikes', () => {
+    const endpoint = '/users-beers-likes';
     const beerId = '$S{createdBeerId}';
-    describe('Create Userslikedbeers', () => {
+
+    describe('Create UsersBeersLikes', () => {
       it('should throw error if beer does not exist', () => {
         return pactum
           .spec()
-          .post('/userslikedbeers')
+          .post(endpoint)
           .withHeaders({ Authorization: 'Bearer $S{userAt}' })
-          .withBody({ beerId })
-          .expectStatus(HttpStatus.CREATED);
+          .withBody({ beerId: 101952 })
+          .expectStatus(HttpStatus.BAD_REQUEST);
       });
       it('should add a new liked beer', () => {
         return pactum
           .spec()
-          .post('/userslikedbeers')
+          .post(endpoint)
           .withHeaders({ Authorization: 'Bearer $S{userAt}' })
           .withBody({ beerId })
           .expectStatus(HttpStatus.CREATED);
@@ -229,15 +235,15 @@ describe('app e2e', () => {
       it('should not remove if beer is not liked', () => {
         return pactum
           .spec()
-          .delete('/userslikedbeers')
+          .delete(endpoint)
           .withHeaders({ Authorization: 'Bearer $S{userAt}' })
           .withBody({ beerId: 4190 })
-          .expectStatus(HttpStatus.NOT_FOUND);
+          .expectStatus(HttpStatus.BAD_REQUEST);
       });
       it('should not remove without auth', () => {
         return pactum
           .spec()
-          .delete('/userslikedbeers')
+          .delete(endpoint)
           .withHeaders({ Authorization: 'Bearer fakejwt' })
           .withBody({ beerId })
           .expectStatus(HttpStatus.UNAUTHORIZED);
@@ -246,10 +252,84 @@ describe('app e2e', () => {
       it('should remove a previously liked beer', () => {
         return pactum
           .spec()
-          .delete('/userslikedbeers')
+          .delete(endpoint)
           .withHeaders({ Authorization: 'Bearer $S{userAt}' })
           .withBody({ beerId })
           .expectStatus(HttpStatus.OK);
+      });
+    });
+  });
+
+  describe('UsersBeersRatings', () => {
+    const endpoint = '/users-beers-ratings';
+    const beerId = '$S{createdBeerId}';
+    const rating = 4;
+    const body = { beerId, rating };
+    describe('Create UsersBeersRatings', () => {
+      it('should throw error if beer does not exist', () => {
+        return pactum
+          .spec()
+          .post(endpoint)
+          .withHeaders({ Authorization: 'Bearer $S{userAt}' })
+          .withBody({ beerId: 421952151, rating })
+          .expectStatus(HttpStatus.BAD_REQUEST)
+          .inspect();
+      });
+      it('should rate a beer', () => {
+        return pactum
+          .spec()
+          .post(endpoint)
+          .withHeaders({ Authorization: 'Bearer $S{userAt}' })
+          .withBody(body)
+          .expectStatus(HttpStatus.CREATED);
+      });
+    });
+
+    describe('Update UsersBeersRatings', () => {
+      it('should throw error if beer does not exist', () => {
+        return pactum
+          .spec()
+          .patch(endpoint)
+          .withHeaders({ Authorization: 'Bearer $S{userAt}' })
+          .withBody({ beerId: 421952151 })
+          .expectStatus(HttpStatus.BAD_REQUEST);
+      });
+      it('should update the rating', () => {
+        return pactum
+          .spec()
+          .patch(endpoint)
+          .withHeaders({ Authorization: 'Bearer $S{userAt}' })
+          .withBody({ beerId, rating: 5 })
+          .expectStatus(HttpStatus.OK);
+      });
+    });
+
+    describe('Delete UsersBeersRatings', () => {
+      it('should not remove rating if beer is not rated by user', () => {
+        return pactum
+          .spec()
+          .delete(endpoint)
+          .withHeaders({ Authorization: 'Bearer $S{userAt}' })
+          .withBody({ beerId: 4190, rating })
+          .expectStatus(HttpStatus.BAD_REQUEST);
+      });
+      it('should not rate without auth', () => {
+        return pactum
+          .spec()
+          .delete(endpoint)
+          .withHeaders({ Authorization: 'Bearer fakejwt' })
+          .withBody(body)
+          .expectStatus(HttpStatus.UNAUTHORIZED);
+      });
+
+      it("should remove a beer's rating", () => {
+        return pactum
+          .spec()
+          .delete(endpoint)
+          .withHeaders({ Authorization: 'Bearer $S{userAt}' })
+          .withBody(body)
+          .expectStatus(HttpStatus.OK)
+          .inspect();
       });
     });
   });

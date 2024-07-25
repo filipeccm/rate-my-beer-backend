@@ -1,6 +1,13 @@
 import { Prisma } from '@prisma/client';
 import { Type } from 'class-transformer';
-import { IsInt, IsNotEmpty, IsOptional, ValidateNested } from 'class-validator';
+import {
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  Max,
+  Min,
+  ValidateNested,
+} from 'class-validator';
 import { IsValidOrderBy } from './order-by-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -15,6 +22,8 @@ export class GetBeersQueryParamsDto {
   @IsInt()
   @IsNotEmpty()
   @IsOptional()
+  @Min(1)
+  @Max(100)
   take?: number;
 
   @ApiProperty({
