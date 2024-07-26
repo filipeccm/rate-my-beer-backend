@@ -25,6 +25,7 @@ export class AuthService {
         select: {
           id: true,
           email: true,
+          role: true,
         },
       });
       return this.signToken(user.id, user.email, user.role);
