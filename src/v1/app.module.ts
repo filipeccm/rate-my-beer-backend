@@ -1,4 +1,9 @@
-import { Module, OnModuleInit } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  OnModuleInit,
+} from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BeersModule } from './beers/beers.module';
@@ -10,6 +15,8 @@ import { UsersBeersRatingsModule } from './ratings/users-beers-ratings.module';
 import { PrismaService } from './prisma/prisma.service';
 import * as argon from 'argon2';
 import { SeedModule } from './seed/seed.module';
+import { HealthCheckMiddleware } from './middlewares/health-check/health-check.middleware';
+import { HealthCheckModule } from './health-check/health-check.module';
 
 @Module({
   imports: [
@@ -20,11 +27,12 @@ import { SeedModule } from './seed/seed.module';
     UsersBeersLikesModule,
     UsersBeersRatingsModule,
     SeedModule,
+    HealthCheckModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule implements OnModuleInit {
+export class AppModule implements OnModuleInit, NestModule {
   constructor(private prisma: PrismaService) {}
   async onModuleInit() {
     const pass = process.env.ADMIN_PASSWORD;
@@ -50,5 +58,9 @@ export class AppModule implements OnModuleInit {
     } catch (err) {
       throw new Error('Could not initialize app');
     }
+  }
+
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(HealthCheckMiddleware).forRoutes('*'); // Apply middleware to all routes
   }
 }
