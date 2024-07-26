@@ -7,6 +7,7 @@ export class UserEntity implements User {
   email: string;
   createdat: Date;
   updatedat: Date;
+  role: 'ADMIN' | 'USER';
   @ApiHideProperty()
   hash: string;
 }
