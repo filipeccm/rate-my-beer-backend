@@ -16,6 +16,7 @@ import { PrismaService } from './prisma/prisma.service';
 import * as argon from 'argon2';
 import { SeedModule } from './seed/seed.module';
 import { HealthCheckMiddleware } from './middlewares/health-check/health-check.middleware';
+import { HealthCheckModule } from './health-check/health-check.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { HealthCheckMiddleware } from './middlewares/health-check/health-check.m
     UsersBeersLikesModule,
     UsersBeersRatingsModule,
     SeedModule,
+    HealthCheckModule,
   ],
   controllers: [AppController],
   providers: [AppService],
