@@ -56,7 +56,8 @@ export class AppModule implements OnModuleInit, NestModule {
         },
       });
     } catch (err) {
-      throw new Error('Could not initialize app');
+      console.error('Could not initialize app');
+      process.exit(1);
     }
   }
 
