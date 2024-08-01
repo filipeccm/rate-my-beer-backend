@@ -10,8 +10,6 @@ import { BeersModule } from './beers/beers.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { UsersBeersLikesModule } from './userslikedbeers/users-beers-likes.module';
-import { UsersBeersRatingsModule } from './ratings/users-beers-ratings.module';
 import { PrismaService } from './prisma/prisma.service';
 import * as argon from 'argon2';
 import { SeedModule } from './seed/seed.module';
@@ -24,8 +22,6 @@ import { HealthCheckModule } from './health-check/health-check.module';
     UsersModule,
     AuthModule,
     PrismaModule,
-    UsersBeersLikesModule,
-    UsersBeersRatingsModule,
     SeedModule,
     HealthCheckModule,
   ],
