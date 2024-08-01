@@ -1,10 +1,6 @@
 import { IsInt, IsNotEmpty } from 'class-validator';
 
-export class CreateBeerRatingDto {
-  @IsNotEmpty()
-  @IsInt()
-  beerId: number;
-
+export class RateBeerDto {
   @IsNotEmpty()
   @IsInt()
   rating: number;

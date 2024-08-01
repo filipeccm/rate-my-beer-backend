@@ -79,6 +79,14 @@ describe('app e2e', () => {
           .withBody(dto)
           .expectStatus(HttpStatus.CREATED);
       });
+
+      it('should throw exception if email is taken', () => {
+        return pactum
+          .spec()
+          .post(endpoint)
+          .withBody(dto)
+          .expectStatus(HttpStatus.FORBIDDEN);
+      });
     });
 
     describe('Signin', () => {
@@ -103,16 +111,29 @@ describe('app e2e', () => {
           .expectStatus(HttpStatus.BAD_REQUEST);
       });
 
+      it('should throw exception if password is wrong', () => {
+        return pactum
+          .spec()
+          .post(endpoint)
+          .withBody({
+            email: dto.email,
+            password: '9-52195-21',
+          })
+          .expectStatus(HttpStatus.UNAUTHORIZED);
+      });
+
       it('should throw exception if body is empty', () => {
         return pactum.spec().post(endpoint).withBody({}).expectStatus(400);
       });
+
       it('should signin', () => {
         return pactum
           .spec()
           .post(endpoint)
           .withBody(dto)
           .expectStatus(HttpStatus.OK)
-          .stores('userAt', 'access_token');
+          .stores('userAt', 'access_token')
+          .stores('userId', 'id');
       });
     });
   });
@@ -193,7 +214,7 @@ describe('app e2e', () => {
     });
     describe('Get Beer By Id', () => {
       const beerId = '$S{createdBeerId}';
-      it('should throw not found exception if beer does not exist', () => {
+      it('should throw error if beer does not exist', () => {
         return pactum
           .spec()
           .get('/beers/1295124')
@@ -208,20 +229,20 @@ describe('app e2e', () => {
     });
   });
 
-  describe('UsersBeersLikes', () => {
-    const endpoint = '/users-beers-likes';
+  describe('User Likes Beer', () => {
     const beerId = '$S{createdBeerId}';
+    const userId = '$S{userId}';
+    const endpoint = `/users/${userId}/liked-beers`;
 
-    describe('Create UsersBeersLikes', () => {
+    describe('Like Beer', () => {
       it('should throw error if beer does not exist', () => {
         return pactum
           .spec()
-          .post(endpoint)
+          .post(endpoint + '/' + '12511')
           .withHeaders({ Authorization: 'Bearer $S{userAt}' })
-          .withBody({ beerId: 101952 })
-          .expectStatus(HttpStatus.BAD_REQUEST);
+          .expectStatus(HttpStatus.NOT_FOUND);
       });
-      it('should add a new liked beer', () => {
+      it('should like a beer', () => {
         return pactum
           .spec()
           .post(endpoint)
@@ -231,105 +252,111 @@ describe('app e2e', () => {
       });
     });
 
-    describe('Delete Userslikedbeers', () => {
-      it('should not remove if beer is not liked', () => {
+    describe('User Dislikes Beer', () => {
+      const deleteEndpoint = endpoint + '/' + beerId;
+      it('should throw an error if beer is not liked', () => {
         return pactum
           .spec()
-          .delete(endpoint)
+          .delete(endpoint + '/' + '1251')
           .withHeaders({ Authorization: 'Bearer $S{userAt}' })
-          .withBody({ beerId: 4190 })
           .expectStatus(HttpStatus.BAD_REQUEST);
       });
+
       it('should not remove without auth', () => {
         return pactum
           .spec()
-          .delete(endpoint)
+          .delete(deleteEndpoint)
           .withHeaders({ Authorization: 'Bearer fakejwt' })
           .withBody({ beerId })
           .expectStatus(HttpStatus.UNAUTHORIZED);
       });
 
-      it('should remove a previously liked beer', () => {
+      it('should throw error if logged user is not the like author', () => {
         return pactum
           .spec()
-          .delete(endpoint)
+          .delete(`/users/42/liked-beers/${beerId}`)
+          .withHeaders({ Authorization: 'Bearer $S{userAt}' })
+          .expectStatus(HttpStatus.UNAUTHORIZED);
+      });
+
+      it('should dislike a previously liked beer', () => {
+        return pactum
+          .spec()
+          .delete(deleteEndpoint)
           .withHeaders({ Authorization: 'Bearer $S{userAt}' })
           .withBody({ beerId })
           .expectStatus(HttpStatus.OK);
+      });
+    });
+
+    describe('Get All Beers Liked By User', () => {
+      const userId = '$S{userId}';
+      const endpoint = `/users/${userId}/liked-beers`;
+      it('should return all beers', () => {
+        return pactum.spec().get(endpoint).expectStatus(HttpStatus.OK);
       });
     });
   });
 
-  describe('UsersBeersRatings', () => {
-    const endpoint = '/users-beers-ratings';
+  describe('User Rates Beer', () => {
     const beerId = '$S{createdBeerId}';
+    const userId = '$S{userId}';
     const rating = 4;
-    const body = { beerId, rating };
-    describe('Create UsersBeersRatings', () => {
+    const endpoint = `/users/${userId}/rated-beers`;
+    const body = { rating };
+    describe('Create Beer Rating', () => {
       it('should throw error if beer does not exist', () => {
         return pactum
           .spec()
-          .post(endpoint)
+          .put(endpoint + '/52151')
           .withHeaders({ Authorization: 'Bearer $S{userAt}' })
-          .withBody({ beerId: 421952151, rating })
+          .withBody(body)
           .expectStatus(HttpStatus.BAD_REQUEST)
           .inspect();
       });
+
+      it('should throw error if logged user is not the rating author', () => {
+        return pactum
+          .spec()
+          .put(`/users/2141/rated-beers/${beerId}`)
+          .withHeaders({ Authorization: 'Bearer $S{userAt}' })
+          .withBody(body)
+          .expectStatus(HttpStatus.UNAUTHORIZED)
+          .inspect();
+      });
+
       it('should rate a beer', () => {
         return pactum
           .spec()
-          .post(endpoint)
+          .put(endpoint + '/' + beerId)
           .withHeaders({ Authorization: 'Bearer $S{userAt}' })
           .withBody(body)
-          .expectStatus(HttpStatus.CREATED);
-      });
-    });
-
-    describe('Update UsersBeersRatings', () => {
-      it('should throw error if beer does not exist', () => {
-        return pactum
-          .spec()
-          .patch(endpoint)
-          .withHeaders({ Authorization: 'Bearer $S{userAt}' })
-          .withBody({ beerId: 421952151 })
-          .expectStatus(HttpStatus.BAD_REQUEST);
-      });
-      it('should update the rating', () => {
-        return pactum
-          .spec()
-          .patch(endpoint)
-          .withHeaders({ Authorization: 'Bearer $S{userAt}' })
-          .withBody({ beerId, rating: 5 })
           .expectStatus(HttpStatus.OK);
       });
     });
 
-    describe('Delete UsersBeersRatings', () => {
+    describe('Delete Beer Rating', () => {
       it('should not remove rating if beer is not rated by user', () => {
         return pactum
           .spec()
-          .delete(endpoint)
+          .delete(`/users/2141/rated-beers/${beerId}`)
           .withHeaders({ Authorization: 'Bearer $S{userAt}' })
-          .withBody({ beerId: 4190, rating })
-          .expectStatus(HttpStatus.BAD_REQUEST);
+          .expectStatus(HttpStatus.UNAUTHORIZED);
       });
       it('should not rate without auth', () => {
         return pactum
           .spec()
-          .delete(endpoint)
+          .delete(`/users/2141/rated-beers/${beerId}`)
           .withHeaders({ Authorization: 'Bearer fakejwt' })
-          .withBody(body)
           .expectStatus(HttpStatus.UNAUTHORIZED);
       });
 
-      it("should remove a beer's rating", () => {
+      it('should remove rating', () => {
         return pactum
           .spec()
-          .delete(endpoint)
+          .delete(endpoint + '/' + beerId)
           .withHeaders({ Authorization: 'Bearer $S{userAt}' })
-          .withBody(body)
-          .expectStatus(HttpStatus.OK)
-          .inspect();
+          .expectStatus(HttpStatus.OK);
       });
     });
   });

@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import * as argon from 'argon2';
 import { AuthSignupDto } from './dto/signup.dto';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
@@ -46,11 +50,11 @@ export class AuthService {
           email: dto.email,
         },
       });
-      if (!user) throw new ForbiddenException('Credentials incorrect');
+      if (!user) throw new UnauthorizedException('Credentials incorrect');
 
       const pwMatches = await argon.verify(user.hash, dto.password);
 
-      if (!pwMatches) throw new ForbiddenException('Credentials incorrect');
+      if (!pwMatches) throw new UnauthorizedException('Credentials incorrect');
 
       return this.signToken(user.id, user.email, user.role);
     } catch (err) {
@@ -62,7 +66,7 @@ export class AuthService {
     userId: number,
     email: string,
     role: string,
-  ): Promise<{ access_token: string }> {
+  ): Promise<{ access_token: string; id: number }> {
     const payload = {
       sub: userId,
       email,
@@ -75,6 +79,7 @@ export class AuthService {
     });
 
     return {
+      id: userId,
       access_token: token,
     };
   }
