@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { GetBeersQueryParamsDto } from './dto/get-beers-params.dto';
 import { OkResponse } from './dto/ok-response.dto';
 import { BeerEntity } from './entity/beer.entity';
+import { CreateBeerDto } from './dto/create-beer.dto';
 
 @Injectable()
 export class BeersService {
@@ -35,7 +36,7 @@ export class BeersService {
     };
   }
 
-  createBeer(data: Prisma.BeerCreateInput): Promise<Beer> {
+  createBeer(data: CreateBeerDto): Promise<Beer> {
     return this.prisma.beer.create({ data });
   }
 
@@ -65,16 +66,20 @@ export class BeersService {
     const numberOfRatings = beerRatings._count.ratings;
 
     if (numberOfRatings === 0) {
-      return { number_of_ratings: 0, average_rating: 0 };
+      return { number_of_ratings: 0, average_rating: 0, total_rating: 0 };
     }
 
     const totalRating = beerRatings.ratings.reduce(
-      (acc, curr) => acc + curr.rating,
+      (acc, curr) => acc + curr?.rating,
       0,
     );
     const avgRating = totalRating / numberOfRatings;
 
-    return { number_of_ratings: numberOfRatings, average_rating: avgRating };
+    return {
+      number_of_ratings: numberOfRatings,
+      total_rating: totalRating,
+      average_rating: avgRating,
+    };
   }
 
   async getOneBeerLikes(id: number) {
