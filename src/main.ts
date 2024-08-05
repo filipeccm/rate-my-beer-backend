@@ -11,8 +11,9 @@ import compression from '@fastify/compress';
 import { constants } from 'zlib';
 
 async function bootstrap() {
+  const originWhitelist = process.env.CORS_WHITELIST.split(' ');
   const CORS_OPTIONS = {
-    origin: process.env.CORS_WHITELIST.split(' '),
+    origin: originWhitelist,
     allowedHeaders: [
       'Access-Control-Allow-Origin',
       'Origin',
