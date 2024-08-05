@@ -12,5 +12,6 @@ export class AuthSignupDto {
 
   @IsString()
   @IsNotEmpty()
+  @MinLength(8)
   password: string;
 }
